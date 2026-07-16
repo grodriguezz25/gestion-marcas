@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Trademark {
+  id               String      @id @default(cuid())
+  clientName       String
+  trademarkName    String
+  owner            String
+  status           String
+  fileNumber       String?
+  registrationNumber String?
+  applicationDate  DateTime?
+  registrationDate DateTime?
+  expirationDate   DateTime?
+  niceClasses      String?
+  notes            String?
+  logoUrl          String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  documents        Document[]
+}
+
+model Document {
+  id          String    @id @default(cuid())
+  date        DateTime?
+  description String
+  fileUrl     String
+  trademarkId String
+  trademark   Trademark @relation(fields: [trademarkId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+}

@@ -1,0 +1,6 @@
+@echo off
+echo Iniciando servidor de Next.js para el proyecto de marcas...
+echo Abriendo el navegador web en http://localhost:3000...
+start http://localhost:3000
+npm run dev
+pause
