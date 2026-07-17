@@ -13,7 +13,7 @@ export default function Dashboard() {
   const fetchTrademarks = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/trademarks');
+      const res = await fetch('/api/trademarks', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setTrademarks(data);
