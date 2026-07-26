@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
-import { put } from "@vercel/blob";
+import { supabase } from "../../../lib/supabase";
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
@@ -44,11 +44,22 @@ export async function POST(request) {
       
       const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.]/g, '-')}`;
       
-      const blob = await put(filename, file, {
-        access: 'public',
-      });
+      const { data, error } = await supabase
+        .storage
+        .from('uploads')
+        .upload(filename, file);
+        
+      if (error) {
+        console.error("Error uploading to supabase:", error);
+        return null;
+      }
       
-      return blob.url;
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('uploads')
+        .getPublicUrl(filename);
+        
+      return publicUrl;
     };
 
     const logoFile = formData.get("logo");

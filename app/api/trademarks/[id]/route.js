@@ -41,13 +41,28 @@ export async function PUT(request, { params }) {
       }
     });
 
-    const { put } = await import("@vercel/blob");
+    const { supabase } = await import("../../../../lib/supabase");
 
     const saveFile = async (file) => {
       if (!file || !file.name || file.size === 0) return null;
       const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.]/g, '-')}`;
-      const blob = await put(filename, file, { access: 'public' });
-      return blob.url;
+      
+      const { data, error } = await supabase
+        .storage
+        .from('uploads')
+        .upload(filename, file);
+        
+      if (error) {
+        console.error("Error uploading to supabase:", error);
+        return null;
+      }
+      
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('uploads')
+        .getPublicUrl(filename);
+        
+      return publicUrl;
     };
 
     const logoFile = formData.get("logo");
