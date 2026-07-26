@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { existsSync } from "fs";
-
+import { put } from "@vercel/blob";
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
@@ -42,18 +39,16 @@ export async function POST(request) {
     const niceClasses = formData.get("niceClasses") || "";
     const notes = formData.get("notes") || "";
     
-    const uploadDir = join(process.cwd(), "public", "uploads");
-    if (!existsSync(uploadDir)) {
-       await mkdir(uploadDir, { recursive: true });
-    }
-
     const saveFile = async (file) => {
       if (!file || !file.name || file.size === 0) return null;
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
+      
       const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.]/g, '-')}`;
-      await writeFile(join(uploadDir, filename), buffer);
-      return `/uploads/${filename}`;
+      
+      const blob = await put(filename, file, {
+        access: 'public',
+      });
+      
+      return blob.url;
     };
 
     const logoFile = formData.get("logo");

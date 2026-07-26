@@ -41,19 +41,13 @@ export async function PUT(request, { params }) {
       }
     });
 
-    const { writeFile, mkdir } = await import("fs/promises");
-    const { join } = await import("path");
-    const { existsSync } = await import("fs");
-    const uploadDir = join(process.cwd(), "public", "uploads");
-    if (!existsSync(uploadDir)) await mkdir(uploadDir, { recursive: true });
+    const { put } = await import("@vercel/blob");
 
     const saveFile = async (file) => {
       if (!file || !file.name || file.size === 0) return null;
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
       const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/[^a-zA-Z0-9.]/g, '-')}`;
-      await writeFile(join(uploadDir, filename), buffer);
-      return `/uploads/${filename}`;
+      const blob = await put(filename, file, { access: 'public' });
+      return blob.url;
     };
 
     const logoFile = formData.get("logo");
